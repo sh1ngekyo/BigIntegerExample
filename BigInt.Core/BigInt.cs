@@ -8,6 +8,10 @@ namespace BigInt.Core
     {
         private Data Data { get; set; }
 
+        public byte[] GetBits => Data.Bits;
+        public bool IsNegative => Data.Signed;
+        public int GetSize => Data.Size;
+
         public BigInt(long source)
         {
             CreateFromLong(source);
