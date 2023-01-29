@@ -12,6 +12,11 @@ namespace BigInt.Core
         public bool IsNegative => Data.Signed;
         public int GetSize => Data.Size;
 
+        public override string ToString()
+        {
+            return IsNegative ? "-" + string.Join("", GetBits.Select(x => (char)x).Reverse()) : string.Join("", GetBits.Select(x => (char)x).Reverse());
+        }
+
         public BigInt(long source) => Data = CreateFromLong(source);
 
         public BigInt(int source) => Data = CreateFromInt(source);
@@ -30,12 +35,12 @@ namespace BigInt.Core
                 signed = true;
                 source = source[1..];
             }
-            if(source.First() is '+')
+            if (source.First() is '+')
             {
                 source = source[1..];
             }
             source = string.Join("", source.SkipWhile(x => x == '0'));
-            if(!source.All(x => char.IsDigit(x)))
+            if (!source.All(x => char.IsDigit(x)))
                 throw new ArgumentException("Incorrect format", nameof(source));
             Data = source != "" ? CreateFromString(source, signed) : CreateFromNumber(0, false);
         }
