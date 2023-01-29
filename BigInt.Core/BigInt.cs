@@ -12,76 +12,74 @@ namespace BigInt.Core
         public bool IsNegative => Data.Signed;
         public int GetSize => Data.Size;
 
-        public BigInt(long source)
+        public BigInt(long source) => Data = CreateFromLong(source);
+
+        public BigInt(int source) => Data = CreateFromInt(source);
+
+        public BigInt(uint source) => Data = CreateFromUInt(source);
+
+        public BigInt(ulong source) => Data = CreateFromULong(source);
+
+        public BigInt(string source)
         {
-            CreateFromLong(source);
+            if (string.IsNullOrWhiteSpace(source))
+                throw new ArgumentNullException(nameof(source));
+            var signed = false;
+            if (source.First() is '-')
+            {
+                signed = true;
+                source = source[1..];
+            }
+            if(source.First() is '+')
+            {
+                source = source[1..];
+            }
+            source = string.Join("", source.SkipWhile(x => x == '0'));
+            if(!source.All(x => char.IsDigit(x)))
+                throw new ArgumentException("Incorrect format", nameof(source));
+            Data = source != "" ? CreateFromString(source, signed) : CreateFromNumber(0, false);
         }
 
-        public BigInt(int source)
-        {
-            CreateFromInt(source);
-        }
-
-        public BigInt(uint source)
-        {
-            CreateFromUInt(source);
-        }
-
-        public BigInt(ulong source)
-        {
-            CreateFromULong(source);
-        }
-
-        private void CreateFromNumber(ulong source, bool signed)
+        private Data CreateFromNumber(ulong source, bool signed)
         {
             var bits = source.ToString().ToCharArray().Select(c => (byte)c).Reverse().ToArray();
-            Data = new Data(bits, bits.Length, signed);
+            return new Data(bits, bits.Length, signed);
         }
 
-        private void CreateFromInt(int source)
+        private Data CreateFromString(string source, bool signed)
+        {
+            var bits = source.ToCharArray().Select(c => (byte)c).Reverse().ToArray();
+            return new Data(bits, bits.Length, signed);
+        }
+
+        private Data CreateFromInt(int source)
         {
             var signed = source < 0;
             if (signed)
                 source *= -1;
-            CreateFromNumber((ulong)source, signed);
+            return CreateFromNumber((ulong)source, signed);
         }
 
-        private void CreateFromLong(long source)
+        private Data CreateFromLong(long source)
         {
             var signed = source < 0;
             if (signed)
                 source *= -1;
-            CreateFromNumber((ulong)source, signed);
+            return CreateFromNumber((ulong)source, signed);
         }
 
-        private void CreateFromUInt(uint source)
-        {
-            CreateFromNumber(source, false);
-        }
+        private Data CreateFromUInt(uint source) => CreateFromNumber(source, false);
 
-        private void CreateFromULong(ulong source)
-        {
-            CreateFromNumber(source, false);
-        }
+        private Data CreateFromULong(ulong source) => CreateFromNumber(source, false);
 
-        public static implicit operator BigInt(ulong data)
-        {
-            return new BigInt(data);
-        }
+        public static implicit operator BigInt(ulong data) => new BigInt(data);
 
-        public static implicit operator BigInt(long data)
-        {
-            return new BigInt(data);
-        }
+        public static implicit operator BigInt(long data) => new BigInt(data);
 
-        public static implicit operator BigInt(uint data)
-        {
-            return new BigInt(data);
-        }
+        public static implicit operator BigInt(uint data) => new BigInt(data);
 
-        public static implicit operator BigInt(int data)
-        {
-            return new BigInt(data);
-        }
+        public static implicit operator BigInt(int data) => new BigInt(data);
+
+        public static implicit operator BigInt(string data) => new BigInt(data);
     }
 }
