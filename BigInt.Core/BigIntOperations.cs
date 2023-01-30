@@ -126,5 +126,43 @@ namespace BigInt.Core
             Shrink(data);
             return new BigInt(data);
         }
+
+        public static BigInt Mul(BigInt left, BigInt right)
+        {
+            var result = new BigInt(0);
+            if (left.IsZero || right.IsZero)
+                return result;
+            var _base = 0;
+            for (var i = 0; i < right.GetSize; i++)
+            {
+                var chunk = new BigInt(new Data(new byte[left.GetSize + right.GetSize], left.GetSize + right.GetSize, false));
+                var carry = 0;
+                var j = 0;
+                for (; j < left.GetSize; j++)
+                {
+                    var digit = (left.Data.Bits[j] - 48) * (right.Data.Bits[i] - 48) + carry;
+                    carry = digit / 10;
+                    digit %= 10;
+                    chunk.Data.Bits[j] = (byte)(digit + 48);
+                }
+                if (carry > 0)
+                    chunk.Data.Bits[j] = (byte)(carry + 48);
+                for (var k = chunk.GetSize - 1; k >= 0; --k)
+                    if (char.IsDigit((char)chunk.Data.Bits[k]))
+                        chunk.Data.Bits[k + _base] = chunk.Data.Bits[k];
+                for (var k = 0; k < _base; k++)
+                    chunk.Data.Bits[k] = (byte)'0';
+                Shrink(chunk.Data);
+                result = result + chunk;
+                ++_base;
+            }
+            if (left.IsNegative && right.IsNegative)
+                result.Data.Signed = false;
+            if (left.IsNegative && !right.IsNegative)
+                result.Data.Signed = true;
+            if (!left.IsNegative && right.IsNegative)
+                result.Data.Signed = true;
+            return result;
+        }
     }
 }

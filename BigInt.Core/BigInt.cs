@@ -116,6 +116,8 @@ namespace BigInt.Core
             return new BigInt(new Data((byte[])GetBits.Clone(), GetSize, IsNegative));
         }
 
+        public bool IsZero => Data.Bits[0] == '0' && GetSize == 1;
+
         public static implicit operator BigInt(ulong data) => new BigInt(data);
 
         public static implicit operator BigInt(long data) => new BigInt(data);
@@ -134,6 +136,11 @@ namespace BigInt.Core
         public static BigInt operator -(BigInt left, BigInt right)
         {
             return BigIntOperations.Sub(left, right);
+        }
+
+        public static BigInt operator *(BigInt left, BigInt right)
+        {
+            return BigIntOperations.Mul(left, right);
         }
     }
 }
