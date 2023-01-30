@@ -1,12 +1,13 @@
 ﻿using BigInt.Core.Models;
 
 using System;
+using System.Drawing;
 
 namespace BigInt.Core
 {
-    public sealed class BigInt
+    public sealed class BigInt : IComparable<BigInt>, ICloneable
     {
-        private Data Data { get; set; }
+        internal Data Data { get; set; }
 
         public byte[] GetBits => Data.Bits;
         public bool IsNegative => Data.Signed;
@@ -24,6 +25,8 @@ namespace BigInt.Core
         public BigInt(uint source) => Data = CreateFromUInt(source);
 
         public BigInt(ulong source) => Data = CreateFromULong(source);
+
+        internal BigInt(Data source) => Data = source;
 
         public BigInt(string source)
         {
@@ -76,6 +79,28 @@ namespace BigInt.Core
         private Data CreateFromUInt(uint source) => CreateFromNumber(source, false);
 
         private Data CreateFromULong(ulong source) => CreateFromNumber(source, false);
+        public int CompareTo(BigInt? other)
+        {
+            if (other is null)
+                throw new ArgumentNullException(nameof(other));
+            if (GetSize > other.GetSize)
+                return 1;
+            if (other.GetSize > GetSize)
+                return -1;
+            for (var i = GetSize - 1; i >= 0; i--)
+            {
+                if (GetBits[i] > other.GetBits[i])
+                    return 1;
+                if (other.GetBits[i] > GetBits[i])
+                    return -1;
+            }
+            return 0;
+        }
+
+        public object Clone()
+        {
+            return new BigInt(new Data((byte[])GetBits.Clone(), GetSize, IsNegative));
+        }
 
         public static implicit operator BigInt(ulong data) => new BigInt(data);
 
@@ -86,5 +111,15 @@ namespace BigInt.Core
         public static implicit operator BigInt(int data) => new BigInt(data);
 
         public static implicit operator BigInt(string data) => new BigInt(data);
+
+        public static BigInt operator +(BigInt left, BigInt right)
+        {
+            return BigIntOperations.Add(left, right);
+        }
+
+        public static BigInt operator -(BigInt left, BigInt right)
+        {
+            return BigIntOperations.Sub(left, right);
+        }
     }
 }
