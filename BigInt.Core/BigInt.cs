@@ -79,7 +79,8 @@ namespace BigInt.Core
         private Data CreateFromUInt(uint source) => CreateFromNumber(source, false);
 
         private Data CreateFromULong(ulong source) => CreateFromNumber(source, false);
-        public int CompareTo(BigInt? other)
+
+        public int CompareByAbsTo(BigInt? other)
         {
             if (other is null)
                 throw new ArgumentNullException(nameof(other));
@@ -95,6 +96,19 @@ namespace BigInt.Core
                     return -1;
             }
             return 0;
+        }
+
+        public int CompareTo(BigInt? other)
+        {
+            if (other is null)
+                throw new ArgumentNullException(nameof(other));
+            if(!Data.Signed && !other.Data.Signed)
+                return CompareByAbsTo((BigInt?)other);
+            if (!Data.Signed && other.Data.Signed)
+                return 1;
+            if (Data.Signed && !other.Data.Signed)
+                return -1;
+            return CompareByAbsTo((BigInt?)other) * -1;
         }
 
         public object Clone()

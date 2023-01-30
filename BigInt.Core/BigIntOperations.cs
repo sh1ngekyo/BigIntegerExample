@@ -78,7 +78,7 @@ namespace BigInt.Core
 
         public static BigInt Sub(BigInt left, BigInt right)
         {
-            var cmp = left.CompareTo(right);
+            var cmp = left.CompareByAbsTo(right);
             if (left.IsNegative && !right.IsNegative)
             {
                 var copy = (BigInt)right.Clone();
