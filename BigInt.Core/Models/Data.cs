@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BigInt.Core.Models
+﻿namespace BigInt.Core.Models
 {
     internal class Data
     {

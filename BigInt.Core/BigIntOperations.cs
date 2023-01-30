@@ -1,11 +1,5 @@
 ﻿using BigInt.Core.Models;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace BigInt.Core
 {
     internal static class BigIntOperations
@@ -129,10 +123,10 @@ namespace BigInt.Core
 
         public static BigInt Mul(BigInt left, BigInt right)
         {
-            var result = new BigInt(0);
+            BigInt result = 0;
             if (left.IsZero || right.IsZero)
                 return result;
-            var _base = 0;
+            var currentDigitIndex = 0;
             for (var i = 0; i < right.GetSize; i++)
             {
                 var chunk = new BigInt(new Data(new byte[left.GetSize + right.GetSize], left.GetSize + right.GetSize, false));
@@ -149,99 +143,90 @@ namespace BigInt.Core
                     chunk.Data.Bits[j] = (byte)(carry + 48);
                 for (var k = chunk.GetSize - 1; k >= 0; --k)
                     if (char.IsDigit((char)chunk.Data.Bits[k]))
-                        chunk.Data.Bits[k + _base] = chunk.Data.Bits[k];
-                for (var k = 0; k < _base; k++)
+                        chunk.Data.Bits[k + currentDigitIndex] = chunk.Data.Bits[k];
+                for (var k = 0; k < currentDigitIndex; k++)
                     chunk.Data.Bits[k] = (byte)'0';
                 Shrink(chunk.Data);
-                result = result + chunk;
-                ++_base;
+                result += chunk;
+                ++currentDigitIndex;
             }
+            if (left.IsNegative || right.IsNegative)
+                result.Data.Signed = true;
             if (left.IsNegative && right.IsNegative)
                 result.Data.Signed = false;
-            if (left.IsNegative && !right.IsNegative)
-                result.Data.Signed = true;
-            if (!left.IsNegative && right.IsNegative)
-                result.Data.Signed = true;
             return result;
         }
 
         public static BigInt Div(BigInt left, BigInt right)
         {
             if (left.IsZero)
-                return new BigInt(0);
+                return 0;
             if (right.IsZero)
                 throw new DivideByZeroException(nameof(right));
             var cmp = left.CompareByAbsTo(right);
             if (cmp == -1)
-                return new BigInt(0);
+                return 0;
             if (cmp == 0)
-                return new BigInt("1");
-            var result = new BigInt(0);
-            var left_cpy = (BigInt)left.Clone();
-            var right_cpy = (BigInt)right.Clone();
-            var _base = new BigInt("10");
-            left_cpy.Data.Signed = false;
-            right_cpy.Data.Signed = false;
-            while (!left_cpy.IsNegative && left_cpy.CompareByAbsTo(right_cpy) != -1)
+                return 1;
+            BigInt result = 0;
+            var systemBase = 10;
+            var leftCopy = (BigInt)left.Clone();
+            var rightCopy = (BigInt)right.Clone();
+            leftCopy.Data.Signed = false;
+            rightCopy.Data.Signed = false;
+            while (!leftCopy.IsNegative && leftCopy.CompareByAbsTo(rightCopy) != -1)
             {
-                result = Mul(result, _base);
-                BigInt range = new BigInt(0);
-                var i = left_cpy.GetSize - 1;
+                result *= systemBase;
+                BigInt range = 0;
+                var i = leftCopy.GetSize - 1;
                 var j = 1;
-                while (range.CompareByAbsTo(right_cpy) == -1)
+                while (range.CompareByAbsTo(rightCopy) == -1)
                 {
-                    range = Mul(range, _base);
-                    range.Data.Bits[range.GetSize - j++] = left_cpy.GetBits[i--];
+                    range *= systemBase;
+                    range.Data.Bits[range.GetSize - j++] = leftCopy.GetBits[i--];
                 }
-                var q = 0L;
+                var temp = 0L;
                 var range_size_backup = range.GetSize;
-                while (range.CompareByAbsTo(right_cpy) != -1)
+                while (range.CompareByAbsTo(rightCopy) != -1)
                 {
-                    range = Sub(range, right_cpy);
-                    q++;
+                    range -= rightCopy;
+                    temp++;
                 }
-                BigInt q_bigint = new BigInt(q);
-                BigInt sub_range = Mul(right_cpy, q_bigint);
-                for (var k = 0; k < left_cpy.GetSize - range_size_backup; k++)
-                {
-                    sub_range = Mul(sub_range, _base);
-                }
-                BigInt left_tmp = Sub(left_cpy, sub_range);
-                left_cpy = left_tmp;
-                result = Add(result, q_bigint);
+                BigInt numberOfDigits = temp;
+                BigInt subRange = rightCopy * numberOfDigits;
+                for (var k = 0; k < leftCopy.GetSize - range_size_backup; k++)
+                    subRange *= systemBase;
+                leftCopy -= subRange;
+                result += numberOfDigits;
             }
+            if (left.IsNegative || right.IsNegative)
+                result.Data.Signed = true;
             if (left.IsNegative && right.IsNegative)
                 result.Data.Signed = false;
-            if (left.IsNegative && !right.IsNegative)
-                result.Data.Signed = true;
-            if (!left.IsNegative && right.IsNegative)
-                result.Data.Signed = true;
             return result;
         }
 
         public static BigInt Mod(BigInt left, BigInt right)
         {
             if (left.IsZero)
-                return new BigInt(0);
+                return 0;
             if (right.IsZero)
                 throw new DivideByZeroException(nameof(right));
             var cmp = left.CompareByAbsTo(right);
             if (cmp == -1)
-                return new BigInt(0);
+                return 0;
             if (cmp == 0)
-                return new BigInt("1");
-            var left_cpy = (BigInt)left.Clone();
-            var right_cpy = (BigInt)right.Clone();
-            left_cpy.Data.Signed = false;
-            right_cpy.Data.Signed = false;
+                return 1;
+            var leftCopy = (BigInt)left.Clone();
+            var rightCopy = (BigInt)right.Clone();
+            leftCopy.Data.Signed = false;
+            rightCopy.Data.Signed = false;
             var signed = false;
             if (left.IsNegative || right.IsNegative)
                 signed = true;
             if (left.IsNegative && right.IsNegative) 
                 signed = false;
-            BigInt div = Div(left_cpy, right_cpy);
-            BigInt mul = Mul(div, right_cpy);
-            BigInt result = Sub(left_cpy, mul);
+            BigInt result = leftCopy - ((leftCopy / rightCopy) * rightCopy);
             result.Data.Signed = signed;
             return result;
         }

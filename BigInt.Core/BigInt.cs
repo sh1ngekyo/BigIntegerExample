@@ -1,8 +1,5 @@
 ﻿using BigInt.Core.Models;
 
-using System;
-using System.Drawing;
-
 namespace BigInt.Core
 {
     public sealed class BigInt : IComparable<BigInt>, ICloneable
@@ -13,10 +10,10 @@ namespace BigInt.Core
         public bool IsNegative => Data.Signed;
         public int GetSize => Data.Size;
 
-        public override string ToString()
-        {
-            return IsNegative ? "-" + string.Join("", GetBits.Select(x => (char)x).Reverse()) : string.Join("", GetBits.Select(x => (char)x).Reverse());
-        }
+        public override string ToString() 
+            => IsNegative ? 
+            "-" + string.Join("", GetBits.Select(x => (char)x).Reverse()) 
+            : string.Join("", GetBits.Select(x => (char)x).Reverse());
 
         public BigInt(long source) => Data = CreateFromLong(source);
 
@@ -128,29 +125,14 @@ namespace BigInt.Core
 
         public static implicit operator BigInt(string data) => new BigInt(data);
 
-        public static BigInt operator +(BigInt left, BigInt right)
-        {
-            return BigIntOperations.Add(left, right);
-        }
+        public static BigInt operator +(BigInt left, BigInt right) => BigIntOperations.Add(left, right);
 
-        public static BigInt operator -(BigInt left, BigInt right)
-        {
-            return BigIntOperations.Sub(left, right);
-        }
+        public static BigInt operator -(BigInt left, BigInt right) => BigIntOperations.Sub(left, right);
 
-        public static BigInt operator *(BigInt left, BigInt right)
-        {
-            return BigIntOperations.Mul(left, right);
-        }
+        public static BigInt operator *(BigInt left, BigInt right) => BigIntOperations.Mul(left, right);
 
-        public static BigInt operator /(BigInt left, BigInt right)
-        {
-            return BigIntOperations.Div(left, right);
-        }
+        public static BigInt operator /(BigInt left, BigInt right) => BigIntOperations.Div(left, right);
 
-        public static BigInt operator %(BigInt left, BigInt right)
-        {
-            return BigIntOperations.Mod(left, right);
-        }
+        public static BigInt operator %(BigInt left, BigInt right) => BigIntOperations.Mod(left, right);
     }
 }
