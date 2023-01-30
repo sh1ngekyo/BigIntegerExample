@@ -142,5 +142,10 @@ namespace BigInt.Core
         {
             return BigIntOperations.Mul(left, right);
         }
+
+        public static BigInt operator /(BigInt left, BigInt right)
+        {
+            return BigIntOperations.Div(left, right);
+        }
     }
 }

@@ -164,5 +164,59 @@ namespace BigInt.Core
                 result.Data.Signed = true;
             return result;
         }
+
+        public static BigInt Div(BigInt left, BigInt right)
+        {
+            if (left.IsZero)
+                return new BigInt(0);
+            if (right.IsZero)
+                throw new DivideByZeroException(nameof(right));
+            var cmp = left.CompareByAbsTo(right);
+            if (cmp == -1)
+                return new BigInt(0);
+            if (cmp == 0)
+                return new BigInt("1");
+            var result = new BigInt(0);
+            var left_cpy = (BigInt)left.Clone();
+            var right_cpy = (BigInt)right.Clone();
+            var _base = new BigInt("10");
+            left_cpy.Data.Signed = false;
+            right_cpy.Data.Signed = false;
+            while (!left_cpy.IsNegative && left_cpy.CompareByAbsTo(right_cpy) != -1)
+            {
+                result = Mul(result, _base);
+                BigInt range = new BigInt(0);
+                var i = left_cpy.GetSize - 1;
+                var j = 1;
+                while (range.CompareByAbsTo(right_cpy) == -1)
+                {
+                    range = Mul(range, _base);
+                    range.Data.Bits[range.GetSize - j++] = left_cpy.GetBits[i--];
+                }
+                var q = 0L;
+                var range_size_backup = range.GetSize;
+                while (range.CompareByAbsTo(right_cpy) != -1)
+                {
+                    range = Sub(range, right_cpy);
+                    q++;
+                }
+                BigInt q_bigint = new BigInt(q);
+                BigInt sub_range = Mul(right_cpy, q_bigint);
+                for (var k = 0; k < left_cpy.GetSize - range_size_backup; k++)
+                {
+                    sub_range = Mul(sub_range, _base);
+                }
+                BigInt left_tmp = Sub(left_cpy, sub_range);
+                left_cpy = left_tmp;
+                result = Add(result, q_bigint);
+            }
+            if (left.IsNegative && right.IsNegative)
+                result.Data.Signed = false;
+            if (left.IsNegative && !right.IsNegative)
+                result.Data.Signed = true;
+            if (!left.IsNegative && right.IsNegative)
+                result.Data.Signed = true;
+            return result;
+        }
     }
 }
