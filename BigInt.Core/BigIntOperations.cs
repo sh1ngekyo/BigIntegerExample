@@ -218,5 +218,32 @@ namespace BigInt.Core
                 result.Data.Signed = true;
             return result;
         }
+
+        public static BigInt Mod(BigInt left, BigInt right)
+        {
+            if (left.IsZero)
+                return new BigInt(0);
+            if (right.IsZero)
+                throw new DivideByZeroException(nameof(right));
+            var cmp = left.CompareByAbsTo(right);
+            if (cmp == -1)
+                return new BigInt(0);
+            if (cmp == 0)
+                return new BigInt("1");
+            var left_cpy = (BigInt)left.Clone();
+            var right_cpy = (BigInt)right.Clone();
+            left_cpy.Data.Signed = false;
+            right_cpy.Data.Signed = false;
+            var signed = false;
+            if (left.IsNegative || right.IsNegative)
+                signed = true;
+            if (left.IsNegative && right.IsNegative) 
+                signed = false;
+            BigInt div = Div(left_cpy, right_cpy);
+            BigInt mul = Mul(div, right_cpy);
+            BigInt result = Sub(left_cpy, mul);
+            result.Data.Signed = signed;
+            return result;
+        }
     }
 }
