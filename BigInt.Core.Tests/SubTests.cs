@@ -47,9 +47,9 @@ namespace BigInt.Core.Tests
             var expected = "11234566";
             BigInt data = new BigInt("1234567") - new BigInt("-9999999");
             Assert.NotNull(data);
-            Assert.True(data.IsNegative);
+            Assert.False(data.IsNegative);
             Assert.Equal(expected.Length, data.GetSize);
-            Assert.Equal("-" + expected, data.ToString());
+            Assert.Equal(expected, data.ToString());
         }
 
         [Fact]
